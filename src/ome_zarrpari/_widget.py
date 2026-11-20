@@ -467,8 +467,13 @@ class OMEZarrpariWidget(QWidget):
             "images. Applies when loading."
         )
 
-        btn = QPushButton("Load OME-Zarr")
-        btn.clicked.connect(self._on_load)
+        # Only enabled when a path is entered
+        self.load_btn = QPushButton("Load OME-Zarr")
+        self.load_btn.setEnabled(False)
+        self.load_btn.clicked.connect(self._on_load)
+        self.text_box.textChanged.connect(
+            lambda text: self.load_btn.setEnabled(bool(text.strip()))
+        )
 
         # Create label for status messages
         self.status_text = QLabel("")
@@ -483,7 +488,7 @@ class OMEZarrpariWidget(QWidget):
         layout.addLayout(text_row)
 
         layout.addWidget(self.fuse_checkbox)
-        layout.addWidget(btn)
+        layout.addWidget(self.load_btn)
         layout.addWidget(self.status_text)
 
         # Coordinate system of the most recently loaded scene
@@ -514,8 +519,9 @@ class OMEZarrpariWidget(QWidget):
         return self.status_text.text()
 
     def _on_load(self) -> None:
-        path = self.text_box.text()
-        self._load_ome_zarr(path)
+        path = self.text_box.text().strip()
+        if path:
+            self._load_ome_zarr(path)
 
     def _on_browse(self) -> None:
         folder = QFileDialog.getExistingDirectory(self, "Select Folder")
